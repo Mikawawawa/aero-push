@@ -1,6 +1,7 @@
 var ffmpeg = require("fluent-ffmpeg");
 // var inputPath = "rtmp://58.200.131.2:1935/livetv/hunantv";
-var inputPath = "rtsp://39.96.113.7:8554/30954";
+// var inputPath = "rtsp://39.96.113.7:8554/30954";
+const { hls_port, inputPath } = require("./config");
 var outPath = "./public/output.m3u8";
 
 ffmpeg(inputPath)
@@ -49,7 +50,6 @@ ffmpeg(inputPath)
 var HLSServer = require("hls-server");
 
 const http = require("http");
-const port = 8181;
 
 const server = http.createServer();
 
@@ -63,6 +63,6 @@ require("http-attach")(server, (req, res, next) => {
   next();
 });
 
-server.listen(port);
+server.listen(hls_port);
 
 // app.listen(8000);
