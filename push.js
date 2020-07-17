@@ -1,68 +1,68 @@
-var ffmpeg = require("fluent-ffmpeg");
-// var inputPath = "rtmp://58.200.131.2:1935/livetv/hunantv";
-// var inputPath = "rtsp://39.96.113.7:8554/30954";
-const { hls_port, inputPath } = require("./config");
-var outPath = "./public/output.m3u8";
+const ffmpeg = require("fluent-ffmpeg");
+const { hls_port, inputPath, options, wait } = require("./config");
+const outPath = "./public/output.m3u8";
+let flag = false;
 
-ffmpeg(inputPath)
+var EventEmitter = require("events").EventEmitter;
+var event = new EventEmitter();
+
+if (inputPath.indexOf("rtsp") >= 0) {
+  options.push("-rtsp_transport tcp");
+}
+
+let commond = ffmpeg(inputPath)
   // .inputOptions('-re')
   .on("start", function (commandLine) {
-    console.log("ffmpeg 命令: ", commandLine);
+    // console.log("ffmpeg 命令: ", commandLine);
+    console.log("FFmpeg start!");
   })
-  .on("error", function (err, stdout, stderr) {
-    console.log("error: " + err.message);
-    console.log("stdout: " + stdout);
-    console.log("stderr: " + stderr);
+  .on("progress", function (progress) {
+    // console.log("[FFMEPG]", stderrLine);
+    console.log("[FFMEPG]", progress.timemark);
+    flag = true;
   })
-  // .on("progress", function (progress) {
-  //   console.log("progressing: ", progress.percent, " % done");
-  // })
-  .on("stderr", function (stderrLine) {
-    console.log("output: " + stderrLine);
+  .on("error", function (e) {
+    console.log("Ffmpeg has been killed\n", e);
+    event.emit("run");
   })
-  .on("end", function () {
-    console.log("完成 ");
-  })
-  .addOptions([
-    "-c:v libx264",
-    "-c:a aac",
-    "-ac 1",
-    "-strict -2",
-    "-crf 18",
-    "-profile:v baseline",
-    "-maxrate 400k",
-    "-bufsize 1835k",
-    "-pix_fmt yuv420p",
-    "-hls_time 2",
-    // "-hls_list_size 6",
-    "-hls_wrap 20",
-    "-start_number 1",
-  ])
+  .addOptions(options)
+
   .noAudio()
-  // .videoCodec('copy')
-  // .format("flv")
-  // .format("hls")
-  // .format("h264")
-  // .pipe(outPath, {end: true})
-  .output(outPath) // 使用 pipe 管道 ，output 和 run 不可用
-  .run();
+  .output(outPath); // 使用 pipe 管道 ，output 和 run 不可用
+commond.run();
 
-var HLSServer = require("hls-server");
-
+const HLSServer = require("hls-server");
 const http = require("http");
-
 const server = http.createServer();
-
-var hls = new HLSServer(server, {
-  path: "/streams", // Base URI to output HLS streams
-  dir: "./public/", // Directory that input files are stored
-});
 
 require("http-attach")(server, (req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   next();
 });
-
+new HLSServer(server, {
+  path: "/streams", // Base URI to output HLS streams
+  dir: "./public/", // Directory that input files are stored
+});
 server.listen(hls_port);
+
+event.on("run", function () {
+  commond.run();
+});
+
+setInterval(async () => {
+  if (flag === false) {
+    startAble = false;
+    commond.kill();
+    flag = false;
+  } else {
+    flag = false;
+  }
+}, wait * 1000);
+
+process.on("SIGINT", function () {
+  console.log("Closing connection");
+  commond.kill("SIGCONT");
+  process.exit();
+});
 
 // app.listen(8000);

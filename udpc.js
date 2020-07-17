@@ -1,5 +1,5 @@
 const { udp_port } = require("./config");
-const HOST = "127.0.0.1";
+const HOST = "118.25.127.194";
 
 const dgram = require("dgram");
 const message = Buffer.from("My KungFu is Good!");
