@@ -22,7 +22,7 @@ let commond = ffmpeg(inputPath)
     flag = true;
   })
   .on("error", function (e) {
-    console.log("Ffmpeg has been killed\n", e);
+    console.log("Ffmpeg has been killed\n");
     event.emit("run");
   })
   .addOptions(options)
