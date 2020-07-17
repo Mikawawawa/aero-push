@@ -35,14 +35,15 @@ const HLSServer = require("hls-server");
 const http = require("http");
 const server = http.createServer();
 
-require("http-attach")(server, (req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  next();
-});
 new HLSServer(server, {
   path: "/streams", // Base URI to output HLS streams
   dir: "./public/", // Directory that input files are stored
 });
+require("http-attach")(server, (req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  next();
+});
+
 server.listen(hls_port);
 
 event.on("run", function () {
