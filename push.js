@@ -16,6 +16,9 @@ let commond = ffmpeg(inputPath)
     // console.log("ffmpeg 命令: ", commandLine);
     console.log("FFmpeg start!");
   })
+  .on("stderr", (e) => {
+    console.log(e);
+  })
   .on("progress", function (progress) {
     // console.log("[FFMEPG]", stderrLine);
     console.log("[FFMEPG]", progress.timemark);
