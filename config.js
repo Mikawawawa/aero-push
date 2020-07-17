@@ -1,6 +1,6 @@
 module.exports = {
-  inputPath: "rtmp://58.200.131.2:1935/livetv/hunantv",
-  // inputPath: "rtsp://39.96.113.7:8554/30954",
+  // inputPath: "rtmp://58.200.131.2:1935/livetv/hunantv",
+  inputPath: "rtsp://39.96.113.7:8554/30954",
   hls_port: 8181,
   udp_port: 8182,
   wait: 30,
