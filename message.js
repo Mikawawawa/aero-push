@@ -47,7 +47,7 @@ app.post("/sync", (req, res) => {
 
   const {
     flight_time,
-    star,
+    GPS_star: star,
     hdop,
     lon,
     lat,
