@@ -56,7 +56,7 @@ app.post("/sync", (req, res) => {
     speed,
     battery,
     distance,
-  } = { defaultValue, ...req.body };
+  } = { ...defaultValue, ...req.body };
 
   const toWrite = [
     1,
