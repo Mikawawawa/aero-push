@@ -20,4 +20,17 @@ module.exports = {
     "-hls_wrap 20",
     "-start_number 1",
   ],
+  cors: {
+    credentials: true,
+    exposedHeaders: ["Content-Disposition"],
+    origin: [
+      // "http://192.168.0.103:3000",
+      "localhost:8080",
+      /\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}:3000/,
+      /\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}:5000/,
+      /\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}:5001/,
+      /\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}:4000/,
+      /\d{0,3}.\d{0,3}.\d{0,3}.\d{0,3}:8080/,
+    ],
+  },
 };
