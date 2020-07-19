@@ -4,6 +4,9 @@ var express = require("express");
 const cors = require("cors");
 const logger = require("morgan");
 const app = express();
+const fs = require("fs");
+const path = require("path");
+const config = require("./config");
 
 app.use(logger("dev"));
 app.use(cors(require("./config").cors));
@@ -31,10 +34,27 @@ app.post("/sync", (req, res) => {
     lat: 0,
     lon: 0,
   };
+  const body = {
+    height: "0.12",
+    speed: "3.56",
+    flight_time: "12345678",
+    GPS_star: "5",
+    battery: "78",
+    lat: "786",
+    lon: "23413",
+  };
 
-  res.json({
-    success: true,
-  });
+  fs.appendFileSync(
+    path.resolve("./", config.message_path, "./message.txt"),
+    `[${new Date().toLocaleString()}]:` +
+      JSON.stringify({
+        ...defaultValue,
+        ...(req.body || {}),
+      }) +
+      "\n"
+  );
+
+  res.end();
 });
 
 app.use(function (req, res, next) {
