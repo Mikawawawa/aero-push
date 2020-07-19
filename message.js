@@ -18,9 +18,7 @@ app.use(cors());
 
 app.post("/name", (req, res) => {
   console.log("req body", JSON.stringify(req.body, null, 2));
-  res.json({
-    success: true,
-  });
+  res.end();
 });
 
 app.post("/sync", (req, res) => {
