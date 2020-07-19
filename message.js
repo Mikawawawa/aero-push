@@ -72,7 +72,10 @@ app.post("/sync", (req, res) => {
     distance,
   ].join(" ");
 
-  fs.writeFileSync("./", config.message_path, "./message.txt");
+  fs.writeFileSync(
+    path.resolve("./", config.message_path, "./message.txt"),
+    toWrite
+  );
 
   fs.appendFileSync(
     path.resolve("./", config.log_path, "./log.txt"),

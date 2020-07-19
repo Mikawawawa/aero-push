@@ -6,10 +6,8 @@ module.exports = {
   udp_port: 8182,
   wait: 30,
   log_path: "./",
-  message_path: path.resolve(
+  message_path:
     "../../django_test/django_test/django_test/app1/static/message/",
-    "./message.txt"
-  ),
   options: [
     "-c:v libx264",
     "-c:a aac",
