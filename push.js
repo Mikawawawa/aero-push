@@ -18,7 +18,7 @@ let commond = ffmpeg(inputPath)
   })
   .on("stderr", (e) => {
     if (e.indexOf("Connection timed out")) {
-      console.log("here err");
+      flag = false;
     }
     console.log(e);
   })
