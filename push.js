@@ -17,6 +17,9 @@ let commond = ffmpeg(inputPath)
     console.log("FFmpeg start!");
   })
   .on("stderr", (e) => {
+    if (e.indexOf("Connection timed out")) {
+      console.log("here err");
+    }
     console.log(e);
   })
   .on("progress", function (progress) {
