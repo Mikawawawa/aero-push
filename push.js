@@ -57,7 +57,7 @@ event.on("run", function () {
 setInterval(async () => {
   if (flag === false) {
     startAble = false;
-    commond.kill();
+    commond.kill("SIGKILL");
     flag = false;
   } else {
     flag = false;
@@ -66,7 +66,8 @@ setInterval(async () => {
 
 process.on("SIGINT", function () {
   console.log("Closing connection");
-  commond.kill("SIGCONT");
+  commond.kill("SIGSTOP");
+  commond.kill("SIGKILL");
   process.exit();
 });
 
