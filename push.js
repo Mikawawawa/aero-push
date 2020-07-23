@@ -10,6 +10,18 @@ if (inputPath.indexOf("rtsp") >= 0) {
   options.push("-rtsp_transport tcp");
 }
 
+const throttle = (function () {
+  let timer;
+  return function () {
+    if (timer !== undefined) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+      flag = false;
+    }, 5000);
+  };
+})();
+
 let commond = ffmpeg(inputPath)
   // .inputOptions('-re')
   .on("start", function (commandLine) {
@@ -25,6 +37,7 @@ let commond = ffmpeg(inputPath)
   .on("progress", function (progress) {
     // console.log("[FFMEPG]", stderrLine);
     console.log("[FFMEPG]", progress.timemark);
+    throttle();
     flag = true;
   })
   .on("error", function (e) {
