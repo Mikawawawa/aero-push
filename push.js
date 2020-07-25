@@ -1,90 +1,118 @@
 const ffmpeg = require("fluent-ffmpeg");
 const { hls_port, inputPath, options, wait } = require("./config");
+const { execSync } = require("child_process");
 const outPath = "./public/output.m3u8";
-let flag = false;
 
 var EventEmitter = require("events").EventEmitter;
 var event = new EventEmitter();
 
-if (inputPath.indexOf("rtsp") >= 0) {
-  options.push("-rtsp_transport tcp");
+class Puller {
+  constructor() {
+    this.flag = false;
+
+    this.commond = this.createCommond();
+    console.log(this.commond);
+    this.throttle = this.createThrottle();
+  }
+
+  run() {
+    this.commond.run();
+    if (!this.watcher) {
+      this.watchDog();
+    }
+  }
+
+  push() {
+    const HLSServer = require("hls-server");
+    const http = require("http");
+    const url = require("url");
+    const server = http.createServer();
+
+    new HLSServer(server, {
+      path: "/streams", // Base URI to output HLS streams
+      dir: "./public/", // Directory that input files are stored
+    });
+    require("http-attach")(server, (req, res, next) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      next();
+    });
+
+    server.listen(hls_port);
+  }
+
+  createThrottle() {
+    let timer;
+    return function () {
+      this.flag = true;
+      if (timer !== undefined) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(() => {
+        this.flag = false;
+      }, 5000);
+    };
+  }
+
+  createCommond() {
+    if (inputPath.indexOf("rtsp") >= 0) {
+      options.push("-rtsp_transport tcp");
+    }
+    return (
+      new ffmpeg(inputPath)
+        // .inputOptions('-re')
+        .on("start", () => {
+          // console.log("ffmpeg 命令: ", commandLine);
+          console.log("FFmpeg start!");
+        })
+        .on("stderr", (e) => {
+          console.log(e);
+        })
+        .on("error", function (e) {
+          console.log(e);
+        })
+        .on("progress", function (progress) {
+          throttle();
+        })
+        .on("error", function (e) {
+          console.log("Ffmpeg has been killed\n");
+          event.emit("run");
+        })
+        .addOptions(options)
+        .noAudio()
+        .output(outPath)
+    ); // 使用 pipe 管道 ，output 和 run 不可用
+  }
+
+  watchDog() {
+    this.watcher = true;
+    event.on("run", () => {
+      this.run();
+    });
+
+    setInterval(async () => {
+      if (this.flag === false) {
+        this.commond.kill("SIGKILL");
+        console.log(
+          execSync(
+            "ps -ef |grep ffprobe|grep -v grep|cut -c 9-15 | xargs kill"
+          ).toString()
+        );
+        this.flag = false;
+      } else {
+        this.flag = false;
+      }
+    }, wait * 1000);
+
+    process.on("SIGINT", function () {
+      console.log("Closing connection");
+      this.commond.kill("SIGKILL");
+      process.exit();
+    });
+  }
 }
 
-const throttle = (function () {
-  let timer;
-  return function () {
-    if (timer !== undefined) {
-      clearTimeout(timer);
-    }
-    timer = setTimeout(() => {
-      flag = false;
-    }, 5000);
-  };
+(() => {
+  const puller = new Puller();
+  puller.run();
+  puller.push();
 })();
-
-let commond = ffmpeg(inputPath)
-  // .inputOptions('-re')
-  .on("start", function (commandLine) {
-    // console.log("ffmpeg 命令: ", commandLine);
-    console.log("FFmpeg start!");
-  })
-  .on("stderr", (e) => {
-    if (e.indexOf("Connection timed out")) {
-      flag = false;
-    }
-    console.log(e);
-  })
-  .on("progress", function (progress) {
-    // console.log("[FFMEPG]", stderrLine);
-    console.log("[FFMEPG]", progress.timemark);
-    throttle();
-    flag = true;
-  })
-  .on("error", function (e) {
-    console.log("Ffmpeg has been killed\n");
-    event.emit("run");
-  })
-  .addOptions(options)
-
-  .noAudio()
-  .output(outPath); // 使用 pipe 管道 ，output 和 run 不可用
-commond.run();
-
-const HLSServer = require("hls-server");
-const http = require("http");
-const url = require("url");
-const server = http.createServer();
-
-new HLSServer(server, {
-  path: "/streams", // Base URI to output HLS streams
-  dir: "./public/", // Directory that input files are stored
-});
-require("http-attach")(server, (req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  next();
-});
-
-server.listen(hls_port);
-
-event.on("run", function () {
-  commond.run();
-});
-
-setInterval(async () => {
-  if (flag === false) {
-    startAble = false;
-    commond.kill("SIGKILL");
-    flag = false;
-  } else {
-    flag = false;
-  }
-}, wait * 1000);
-
-process.on("SIGINT", function () {
-  console.log("Closing connection");
-  commond.kill("SIGSTOP");
-  commond.kill("SIGKILL");
-  process.exit();
-});
-
-// app.listen(8000);

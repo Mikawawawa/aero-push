@@ -4,7 +4,7 @@ module.exports = {
   inputPath: "rtsp://39.96.113.7:8554/30954",
   hls_port: 8181,
   udp_port: 8182,
-  wait: 30,
+  wait: 10,
   log_path: "./",
   message_path: "../../django_test/django_test/app1/static/message/",
   options: [
