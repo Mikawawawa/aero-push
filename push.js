@@ -71,7 +71,7 @@ class Puller {
           console.log(e);
         })
         .on("progress", function (progress) {
-          throttle();
+          this.throttle();
         })
         .on("error", function (e) {
           console.log("Ffmpeg has been killed\n");
