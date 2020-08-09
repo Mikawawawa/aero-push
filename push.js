@@ -11,7 +11,7 @@ class Puller {
     this.flag = false;
     this.timer = undefined;
     this.commond = this.createCommond();
-    console.log(this.commond);
+    // console.log(this.commond);
   }
 
   run() {
@@ -101,7 +101,7 @@ class Puller {
 
     process.on("SIGINT", () => {
       console.log("Closing connection");
-      this.commond.kill("SIGKILL");
+      this.commond && this.commond.kill("SIGKILL");
       process.exit();
     });
   }
