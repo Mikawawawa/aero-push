@@ -66,7 +66,7 @@ class Puller {
         .on("error", function (e) {
           console.log(e);
         })
-        .on("progress", function (progress) {
+        .on("progress", (progress) => {
           this.throttle();
         })
         .on("error", function (e) {
