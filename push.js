@@ -11,6 +11,7 @@ class Puller {
     this.flag = false;
     this.timer = undefined;
     this.commond = this.createCommond();
+    console.log(this.commond);
   }
 
   run() {
@@ -46,6 +47,36 @@ class Puller {
     this.timer = setTimeout(() => {
       this.flag = false;
     }, 5000);
+  }
+
+  createCommond() {
+    if (inputPath.indexOf("rtsp") >= 0) {
+      options.push("-rtsp_transport tcp");
+    }
+    return (
+      new ffmpeg(inputPath)
+        // .inputOptions('-re')
+        .on("start", () => {
+          // console.log("ffmpeg 命令: ", commandLine);
+          console.log("FFmpeg start!");
+        })
+        .on("stderr", (e) => {
+          console.log(e);
+        })
+        .on("error", function (e) {
+          console.log(e);
+        })
+        .on("progress", function (progress) {
+          this.throttle();
+        })
+        .on("error", function (e) {
+          console.log("Ffmpeg has been killed\n");
+          event.emit("run");
+        })
+        .addOptions(options)
+        .noAudio()
+        .output(outPath)
+    ); // 使用 pipe 管道 ，output 和 run 不可用
   }
 
   watchDog() {
