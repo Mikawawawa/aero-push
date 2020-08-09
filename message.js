@@ -70,6 +70,7 @@ app.post("/sync", (req, res) => {
     speed,
     battery,
     distance,
+    new Date().getTime(),
   ].join(" ");
 
   fs.writeFileSync(
