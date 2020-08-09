@@ -99,7 +99,7 @@ class Puller {
       }
     }, wait * 1000);
 
-    process.on("SIGINT", function () {
+    process.on("SIGINT", () => {
       console.log("Closing connection");
       this.commond.kill("SIGKILL");
       process.exit();
