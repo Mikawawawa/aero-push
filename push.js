@@ -9,10 +9,8 @@ var event = new EventEmitter();
 class Puller {
   constructor() {
     this.flag = false;
-
+    this.timer = undefined;
     this.commond = this.createCommond();
-    console.log(this.commond);
-    this.throttle = this.createThrottle();
   }
 
   run() {
@@ -40,47 +38,14 @@ class Puller {
     server.listen(hls_port);
   }
 
-  createThrottle() {
-    let timer;
-    return function () {
-      this.flag = true;
-      if (timer !== undefined) {
-        clearTimeout(timer);
-      }
-      timer = setTimeout(() => {
-        this.flag = false;
-      }, 5000);
-    };
-  }
-
-  createCommond() {
-    if (inputPath.indexOf("rtsp") >= 0) {
-      options.push("-rtsp_transport tcp");
+  throttle() {
+    this.flag = true;
+    if (this.timer !== undefined) {
+      clearTimeout(this.timer);
     }
-    return (
-      new ffmpeg(inputPath)
-        // .inputOptions('-re')
-        .on("start", () => {
-          // console.log("ffmpeg 命令: ", commandLine);
-          console.log("FFmpeg start!");
-        })
-        .on("stderr", (e) => {
-          console.log(e);
-        })
-        .on("error", function (e) {
-          console.log(e);
-        })
-        .on("progress", function (progress) {
-          this.throttle();
-        })
-        .on("error", function (e) {
-          console.log("Ffmpeg has been killed\n");
-          event.emit("run");
-        })
-        .addOptions(options)
-        .noAudio()
-        .output(outPath)
-    ); // 使用 pipe 管道 ，output 和 run 不可用
+    this.timer = setTimeout(() => {
+      this.flag = false;
+    }, 5000);
   }
 
   watchDog() {
