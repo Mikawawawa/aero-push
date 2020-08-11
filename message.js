@@ -2,6 +2,7 @@ var createError = require("http-errors");
 var cookieParser = require("cookie-parser");
 var express = require("express");
 const cors = require("cors");
+const { execSync } = require("child_process");
 const logger = require("morgan");
 const app = express();
 const fs = require("fs");
@@ -89,6 +90,12 @@ app.post("/sync", (req, res) => {
   );
 
   res.end();
+});
+
+app.get("/reboot", (req, res) => {
+  req.json({
+    data: execSync("pm2 restart all").toString(),
+  });
 });
 
 app.use(function (req, res, next) {
