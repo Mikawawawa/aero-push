@@ -93,9 +93,7 @@ app.post("/sync", (req, res) => {
 });
 
 app.get("/reboot", (req, res) => {
-  res.json({
-    data: execSync("pm2 restart aero-push").toString(),
-  });
+  res.send(execSync("pm2 restart aero-push").toString());
 });
 
 app.use(function (req, res, next) {
